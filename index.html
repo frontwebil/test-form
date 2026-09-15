@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lead Form</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+      }
+
+      .form {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 24px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      .form h2 {
+        margin: 0 0 20px;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+
+      .form input,
+      .form textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        font-family: inherit;
+      }
+
+      .form textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .form button {
+        width: 100%;
+        padding: 12px;
+        border: 0;
+        border-radius: 8px;
+        background: #111;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .form button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      #message {
+        margin-top: 15px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form class="form" id="leadForm">
+      <h2>Залишити заявку</h2>
+
+      <div class="form-group">
+        <label for="name">Ім'я</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="Ваше ім'я"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Телефон</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          placeholder="+380..."
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="comment">Коментар</label>
+        <textarea
+          id="comment"
+          name="comment"
+          placeholder="Ваш коментар"
+        ></textarea>
+      </div>
+
+      <button type="submit" id="submitButton">Відправити</button>
+
+      <div id="message"></div>
+    </form>
+
+    <script>
+      const form = document.getElementById("leadForm");
+      const button = document.getElementById("submitButton");
+      const message = document.getElementById("message");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        button.disabled = true;
+        message.textContent = "Відправка...";
+
+        const formData = new FormData(form);
+
+        const data = {
+          name: formData.get("name"),
+          phone: formData.get("phone"),
+          comment: formData.get("comment"),
+        };
+
+        try {
+          const response = await fetch("http://localhost:3000/api/leed", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-site-id": "YOUR_SITE_ID",
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.message || "Помилка відправки");
+          }
+
+          message.textContent = "Заявку успішно відправлено!";
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          message.textContent = error.message || "Щось пішло не так";
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
